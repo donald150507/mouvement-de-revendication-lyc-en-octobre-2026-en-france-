@@ -4,4 +4,4 @@ Ce questionnaire est totalement anonyme et indépendant. Aucune donnée permetta
 
 # Partage du formulaire
 - lien : https://tally.so/r/9qzzG4
-- QR Code :  ![Alt text](../)
+- QR Code :  ![Alt text](qrcode_tally.so.png)
