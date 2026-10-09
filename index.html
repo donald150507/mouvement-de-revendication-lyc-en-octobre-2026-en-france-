@@ -8,7 +8,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <style>
-    /* Style minimaliste */
     .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; display: flex; flex-direction: column;}
     .table-container { overflow-x: auto; }
     table { width: 100%; text-align: left; border-collapse: collapse; }
@@ -20,11 +19,10 @@
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
 
-  <!-- Bannière et Boutons -->
   <header class="w-full flex flex-col items-center mb-8">
     
     <div class="w-full h-64 bg-gray-200 overflow-hidden flex items-center justify-center">
-      <img src="banner.avif" alt="Bannière Mouvement Lycéen" class="w-full h-full object-cover object-[center_75%]" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <img src="banner.jpg" alt="Bannière Mouvement Lycéen" class="w-full h-full object-cover object-[center_75%]" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
       <div class="hidden text-gray-500 font-semibold">Image de bannière (banner.avif)</div>
     </div>
 
@@ -45,10 +43,10 @@
     </div>
   </header>
 
-  <!-- Contenu Principal -->
+
   <main class="container mx-auto px-4 pb-12 max-w-7xl">
     
-    <!-- Profil et Contexte -->
+
     <h2 class="section-title">1. Profil et Contexte</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="card">
@@ -65,7 +63,7 @@
       </div>
     </div>
 
-    <!-- Position sur le mouvement -->
+
     <h2 class="section-title">2. Position sur le mouvement</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       <div class="card">
@@ -90,7 +88,7 @@
       <div class="table-container" id="tableOpposition"></div>
     </div>
 
-    <!-- Modes d'action et sécurité -->
+
     <h2 class="section-title">3. Modes d'action et Sécurité</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       <div class="card">
@@ -119,7 +117,6 @@
       </div>
     </div>
 
-    <!-- Information, médias et perspectives -->
     <h2 class="section-title">4. Information, Médias et Perspectives</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="card">
@@ -142,7 +139,6 @@
       </div>
     </div>
 
-    <!-- Rythme scolaire -->
     <h2 class="section-title">5. Rythme Scolaire</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="card">
