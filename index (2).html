@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Mouvement Lycéen Octobre 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <style>
+    /* Style minimaliste */
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; }
+    .table-container { overflow-x: auto; }
+    table { width: 100%; text-align: left; border-collapse: collapse; }
+    th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 0.875rem; }
+    th { background-color: #f9fafb; font-weight: 600; color: #374151; }
+    .heat-cell { background-color: rgba(59, 130, 246, 0.1); }
+    h2.section-title { font-size: 1.25rem; font-weight: 700; color: #111827; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+  <!-- Bannière et Boutons -->
+  <header class="w-full flex flex-col items-center mb-8">
+    <div class="w-full h-48 bg-gray-200 overflow-hidden flex items-center justify-center">
+      <img src="banner.png" alt="Bannière Mouvement Lycéen" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <div class="hidden text-gray-500 font-semibold">Image de bannière (banner.png)</div>
+    </div>
+    
+    <div class="mt-6 flex flex-wrap justify-center gap-4 px-4">
+      <a href="https://tally.so/r/9qzzG4" target="_blank" class="px-6 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 transition">
+        Répondre au questionnaire
+      </a>
+      <a href="https://github.com/donald150507/mouvement-de-revendication-lyc-en-octobre-2026-en-france-" target="_blank" class="px-6 py-2 bg-gray-800 text-white font-medium rounded hover:bg-gray-900 transition">
+        Voir le GitHub
+      </a>
+      <a href="qrcode_tally.so.png" download class="px-6 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded hover:bg-gray-100 transition flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+        Télécharger le QR Code
+      </a>
+    </div>
+  </header>
+
+  <!-- Contenu Principal -->
+  <main class="container mx-auto px-4 pb-12 max-w-7xl">
+    
+    <!-- Profil et Contexte -->
+    <h2 class="section-title">1. Profil et Contexte</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Quel est votre statut principal ?</h3>
+        <canvas id="chartStatut" height="250"></canvas>
+      </div>
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Départements les plus représentés (Top 10)</h3>
+        <canvas id="chartDept" height="250"></canvas>
+      </div>
+    </div>
+
+    <!-- Position sur le mouvement -->
+    <h2 class="section-title">2. Position sur le mouvement</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Position globale par rapport au mouvement</h3>
+        <canvas id="chartPosition" height="250"></canvas>
+      </div>
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Connaissance des revendications portées</h3>
+        <canvas id="chartConnaissance" height="250"></canvas>
+      </div>
+    </div>
+    <div class="card mb-6">
+      <h3 class="text-sm font-semibold text-gray-600 mb-4">Revendications estimées les plus légitimes (par ordre de priorité)</h3>
+      <div class="table-container" id="tableRevendications"></div>
+    </div>
+    <div class="card">
+      <h3 class="text-sm font-semibold text-gray-600 mb-4">Principales raisons d'opposition (par ordre de priorité)</h3>
+      <div class="table-container" id="tableOpposition"></div>
+    </div>
+
+    <!-- Modes d'action et sécurité -->
+    <h2 class="section-title">3. Modes d'action et Sécurité</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Avis sur les modes d'action (blocages, rassemblements)</h3>
+        <canvas id="chartAvisActions" height="250"></canvas>
+      </div>
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Intervention des forces de l'ordre</h3>
+        <canvas id="chartForcesOrdre" height="250"></canvas>
+      </div>
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Confrontation à des situations de tensions/violences</h3>
+        <canvas id="chartViolences" height="250"></canvas>
+      </div>
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Types de situations (si confrontation)</h3>
+        <canvas id="chartTypeViolences" height="250"></canvas>
+      </div>
+    </div>
+
+    <!-- Information, médias et perspectives -->
+    <h2 class="section-title">4. Information, Médias et Perspectives</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Canaux d'information principaux</h3>
+        <canvas id="chartCanaux" height="250"></canvas>
+      </div>
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Fiabilité de la couverture médiatique</h3>
+        <canvas id="chartMedias" height="250"></canvas>
+      </div>
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Obtention d'avancées concrètes ?</h3>
+        <canvas id="chartAvancees" height="250"></canvas>
+      </div>
+    </div>
+
+    <!-- Rythme scolaire -->
+    <h2 class="section-title">5. Rythme Scolaire</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Appréciation de l'emploi du temps</h3>
+        <canvas id="chartEmploiTemps" height="250"></canvas>
+      </div>
+      <div class="card">
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Favorable à une réorganisation du rythme scolaire ?</h3>
+        <canvas id="chartReorganisation" height="250"></canvas>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQXUmOKVqGizSZcMfrSzQSiXTg2wEZXq-PYc-f9Yl7aunAVw-sqeIdBFZf8NriRZiQAXW6PCpr62NAO/pub?gid=0&single=true&output=csv";
+    const THRESHOLD = 200;
+
+    Papa.parse(CSV_URL, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        buildDashboard(results.data);
+      }
+    });
+
+    function getPercentage(count, total) {
+      if (total === 0) return 0;
+      return Math.round((count / total) * 100);
+    }
+
+    function buildDashboard(data) {
+      const total = data.length;
+      const showCounts = total >= THRESHOLD;
+
+      // Configuration commune pour Chart.js (design épuré)
+      Chart.defaults.font.family = 'Inter, sans-serif';
+      Chart.defaults.color = '#6B7280';
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 12 } },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let val = context.raw;
+                let perc = getPercentage(val, total);
+                return showCounts ? `${val} (${perc}%)` : `${perc}%`;
+              }
+            }
+          }
+        }
+      };
+      const barOptions = {
+        ...commonOptions,
+        plugins: { ...commonOptions.plugins, legend: { display: false } },
+        scales: { y: { ticks: { callback: function(val) { return showCounts ? val : getPercentage(val, total) + '%'; } } } }
+      };
+      const hBarOptions = {
+        ...commonOptions,
+        indexAxis: 'y',
+        plugins: { ...commonOptions.plugins, legend: { display: false } },
+        scales: { x: { ticks: { callback: function(val) { return showCounts ? val : getPercentage(val, total) + '%'; } } } }
+      };
+
+      // 1. Initialisation des compteurs
+      const counts = {
+        statuts: {}, depts: {}, positions: {}, connaissances: {},
+        avisActions: {}, forcesOrdre: {}, violences: {}, typeViolences: {},
+        canaux: {}, medias: {}, avancees: {}, emploiTemps: {}, reorg: {}
+      };
+      const matrixRevendications = {}, matrixOpposition = {};
+
+      // 2. Collecte des données
+      data.forEach(row => {
+        let val;
+
+        val = row["Quel est votre statut principal ?"];
+        if(val) counts.statuts[val] = (counts.statuts[val] || 0) + 1;
+
+        val = row["Dans quel département votre établissement se situe-t-il ?"];
+        if(val) counts.depts[val] = (counts.depts[val] || 0) + 1;
+
+        val = row["Quelle est votre position globale par rapport au mouvement de protestation actuel ?"];
+        if(val) counts.positions[val] = (counts.positions[val] || 0) + 1;
+
+        // Note : Gérer les variations d'espaces dans les noms de colonnes
+        val = row["Avez-vous une connaissance des revendications portées?"] || row["Avez-vous une connaissance des revendications portées ?"];
+        if(val) counts.connaissances[val] = (counts.connaissances[val] || 0) + 1;
+
+        val = row["Que pensez-vous des modes d'action utilisés (blocages d'établissements, rassemblements) ? (Choix unique)"];
+        if(val) counts.avisActions[val] = (counts.avisActions[val] || 0) + 1;
+
+        val = row["Que pensez-vous de l'intervention des forces de l'ordre lors de ces rassemblements ? (Choix unique)"];
+        if(val) counts.forcesOrdre[val] = (counts.forcesOrdre[val] || 0) + 1;
+
+        val = row["Avez-vous été directement confronté(e) ou témoin de situations de tensions ou de violences lors de ces rassemblements ? (Choix unique)"];
+        if(val) counts.violences[val] = (counts.violences[val] || 0) + 1;
+
+        val = row["Estimez-vous que la couverture médiatique reflète fidèlement la réalité du terrain ? (Choix unique)"];
+        if(val) counts.medias[val] = (counts.medias[val] || 0) + 1;
+
+        val = row["Pensez-vous que cette mobilisation permettra d'obtenir des avancées concrètes ? (Choix unique)"];
+        if(val) counts.avancees[val] = (counts.avancees[val] || 0) + 1;
+
+        val = row["Trouvez-vous votre emploi du temps hebdomadaire (ou celui de vos élèves ou enfants) trop chargé ? (Choix unique)"];
+        if(val) counts.emploiTemps[val] = (counts.emploiTemps[val] || 0) + 1;
+
+        val = row["Seriez-vous favorable à une réorganisation du rythme scolaire (moins d'heures de cours par jour avec des après-midis souvent libérés, mais des vacances scolaires plus courtes) ? (Choix unique)"];
+        if(val) counts.reorg[val] = (counts.reorg[val] || 0) + 1;
+
+        // Choix multiples (séparés par virgule)
+        val = row["Par quels canaux vous informez-vous principalement sur ce mouvement ? (2 Choix possible)"];
+        if (val) val.split(',').forEach(i => { let c = i.trim(); if (c) counts.canaux[c] = (counts.canaux[c] || 0) + 1; });
+
+        val = row["Quel type de situation s'agissait-il ? (Choix multiple)"];
+        if (val) val.split(',').forEach(i => { let c = i.trim(); if (c) counts.typeViolences[c] = (counts.typeViolences[c] || 0) + 1; });
+
+        // Tableaux à double entrée
+        let revs = row["Quelles sont les revendications que vous estimez les plus légitimes et vraies ? (Choisissez par ordre de priorité)"];
+        if (revs) revs.split(',').forEach((i, idx) => {
+            let c = i.trim(); let rank = idx + 1;
+            if (!matrixRevendications[c]) matrixRevendications[c] = {};
+            matrixRevendications[c][rank] = (matrixRevendications[c][rank] || 0) + 1;
+        });
+
+        let opps = row["Si vous vous opposez totalement ou partiellement au mouvement, quelles en sont les principales raisons ? (Choisissez par ordre de priorité)"];
+        if (opps) opps.split(',').forEach((i, idx) => {
+            let c = i.trim(); let rank = idx + 1;
+            if (!matrixOpposition[c]) matrixOpposition[c] = {};
+            matrixOpposition[c][rank] = (matrixOpposition[c][rank] || 0) + 1;
+        });
+      });
+
+      // Tri des départements (Top 10)
+      const sortedDepts = Object.entries(counts.depts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      const deptsLabels = sortedDepts.map(d => d[0]);
+      const deptsData = sortedDepts.map(d => d[1]);
+
+      // --- Rendu des Graphiques ---
+
+      new Chart(document.getElementById('chartStatut'), { type: 'doughnut', data: { labels: Object.keys(counts.statuts), datasets: [{ data: Object.values(counts.statuts), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6b7280'] }] }, options: commonOptions });
+      new Chart(document.getElementById('chartDept'), { type: 'bar', data: { labels: deptsLabels, datasets: [{ data: deptsData, backgroundColor: '#94a3b8' }] }, options: barOptions });
+      
+      new Chart(document.getElementById('chartPosition'), { type: 'bar', data: { labels: Object.keys(counts.positions), datasets: [{ data: Object.values(counts.positions), backgroundColor: '#6366f1' }] }, options: barOptions });
+      new Chart(document.getElementById('chartConnaissance'), { type: 'pie', data: { labels: Object.keys(counts.connaissances), datasets: [{ data: Object.values(counts.connaissances), backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'] }] }, options: commonOptions });
+      
+      new Chart(document.getElementById('chartAvisActions'), { type: 'bar', data: { labels: Object.keys(counts.avisActions), datasets: [{ data: Object.values(counts.avisActions), backgroundColor: '#8b5cf6' }] }, options: barOptions });
+      new Chart(document.getElementById('chartForcesOrdre'), { type: 'pie', data: { labels: Object.keys(counts.forcesOrdre), datasets: [{ data: Object.values(counts.forcesOrdre), backgroundColor: ['#3b82f6', '#10b981', '#ef4444', '#9ca3af'] }] }, options: commonOptions });
+      
+      new Chart(document.getElementById('chartViolences'), { type: 'doughnut', data: { labels: Object.keys(counts.violences), datasets: [{ data: Object.values(counts.violences), backgroundColor: ['#ef4444', '#10b981', '#d1d5db'] }] }, options: commonOptions });
+      new Chart(document.getElementById('chartTypeViolences'), { type: 'bar', data: { labels: Object.keys(counts.typeViolences), datasets: [{ data: Object.values(counts.typeViolences), backgroundColor: '#f43f5e' }] }, options: hBarOptions });
+      
+      new Chart(document.getElementById('chartCanaux'), { type: 'bar', data: { labels: Object.keys(counts.canaux), datasets: [{ data: Object.values(counts.canaux), backgroundColor: '#0ea5e9' }] }, options: hBarOptions });
+      new Chart(document.getElementById('chartMedias'), { type: 'doughnut', data: { labels: Object.keys(counts.medias), datasets: [{ data: Object.values(counts.medias), backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }] }, options: commonOptions });
+      new Chart(document.getElementById('chartAvancees'), { type: 'pie', data: { labels: Object.keys(counts.avancees), datasets: [{ data: Object.values(counts.avancees), backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }] }, options: commonOptions });
+      
+      new Chart(document.getElementById('chartEmploiTemps'), { type: 'bar', data: { labels: Object.keys(counts.emploiTemps), datasets: [{ data: Object.values(counts.emploiTemps), backgroundColor: '#f59e0b' }] }, options: barOptions });
+      new Chart(document.getElementById('chartReorganisation'), { type: 'pie', data: { labels: Object.keys(counts.reorg), datasets: [{ data: Object.values(counts.reorg), backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'] }] }, options: commonOptions });
+
+      // --- Rendu des Tableaux à double entrée ---
+      function renderTable(containerId, matrixData) {
+        const container = document.getElementById(containerId);
+        const options = Object.keys(matrixData);
+        if (options.length === 0) {
+          container.innerHTML = "<p class='text-gray-500 text-sm'>Aucune donnée disponible pour le moment.</p>";
+          return;
+        }
+
+        let maxRank = 0;
+        options.forEach(opt => {
+          Object.keys(matrixData[opt]).forEach(r => { if (parseInt(r) > maxRank) maxRank = parseInt(r); });
+        });
+
+        let html = `<table><thead><tr><th>Modalités</th>`;
+        for (let i = 1; i <= maxRank; i++) html += `<th class="text-center">Rang ${i}</th>`;
+        html += `</tr></thead><tbody>`;
+
+        options.forEach(opt => {
+          html += `<tr><td class="font-medium text-gray-700">${opt}</td>`;
+          for (let i = 1; i <= maxRank; i++) {
+            let count = matrixData[opt][i] || 0;
+            let perc = getPercentage(count, total);
+            let cellClass = perc > 20 ? 'heat-cell' : '';
+            let displayVal = showCounts ? `${count} <span class="text-xs text-gray-400">(${perc}%)</span>` : `${perc}%`;
+            if (count === 0) displayVal = "-";
+            html += `<td class="text-center ${cellClass}">${displayVal}</td>`;
+          }
+          html += `</tr>`;
+        });
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+      }
+
+      renderTable('tableRevendications', matrixRevendications);
+      renderTable('tableOpposition', matrixOpposition);
+    }
+  </script>
+</body>
+</html>
