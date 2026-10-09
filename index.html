@@ -14,19 +14,18 @@
     th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 0.875rem; }
     th { background-color: #f9fafb; font-weight: 600; color: #374151; }
     .heat-cell { background-color: rgba(59, 130, 246, 0.1); }
+    .total-cell { background-color: #f3f4f6; font-weight: bold; }
     h2.section-title { font-size: 1.25rem; font-weight: 700; color: #111827; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
   </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
 
   <header class="w-full flex flex-col items-center mb-8">
-    
     <div class="w-full h-64 bg-gray-200 overflow-hidden flex items-center justify-center">
       <img src="banner.jpg" alt="Bannière Mouvement Lycéen" class="w-full h-full object-cover object-[center_75%]" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-      <div class="hidden text-gray-500 font-semibold">Image de bannière (banner.avif)</div>
+      <div class="hidden text-gray-500 font-semibold">Image de bannière (banner.jpg)</div>
     </div>
 
-    
     <div class="mt-6 flex flex-wrap justify-center gap-4 px-4">
       <a href="https://tally.so/r/9qzzG4" target="_blank" class="px-6 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 transition">
         Répondre au questionnaire
@@ -43,9 +42,7 @@
     </div>
   </header>
 
-
   <main class="container mx-auto px-4 pb-12 max-w-7xl">
-    
 
     <h2 class="section-title">1. Profil et Contexte</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -62,7 +59,6 @@
         </div>
       </div>
     </div>
-
 
     <h2 class="section-title">2. Position sur le mouvement</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -87,7 +83,6 @@
       <h3 class="text-sm font-semibold text-gray-600 mb-4">Principales raisons d'opposition (par ordre de priorité)</h3>
       <div class="table-container" id="tableOpposition"></div>
     </div>
-
 
     <h2 class="section-title">3. Modes d'action et Sécurité</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -118,12 +113,11 @@
     </div>
 
     <h2 class="section-title">4. Information, Médias et Perspectives</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       <div class="card">
-        <h3 class="text-sm font-semibold text-gray-600 mb-4">Canaux d'information principaux</h3>
-        <div class="relative h-64 w-full">
-            <canvas id="chartCanaux"></canvas>
-        </div>
+        <h3 class="text-sm font-semibold text-gray-600 mb-4">Canaux d'information principaux (2 choix possibles)</h3>
+        <!-- Remplacement du Canvas par le tableau des Canaux -->
+        <div class="table-container" id="tableCanaux"></div>
       </div>
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Fiabilité de la couverture médiatique</h3>
@@ -131,11 +125,11 @@
             <canvas id="chartMedias"></canvas>
         </div>
       </div>
-      <div class="card">
-        <h3 class="text-sm font-semibold text-gray-600 mb-4">Obtention d'avancées concrètes ?</h3>
-        <div class="relative h-64 w-full">
-            <canvas id="chartAvancees"></canvas>
-        </div>
+    </div>
+    <div class="card">
+      <h3 class="text-sm font-semibold text-gray-600 mb-4">Obtention d'avancées concrètes ?</h3>
+      <div class="relative h-64 w-full">
+          <canvas id="chartAvancees"></canvas>
       </div>
     </div>
 
@@ -175,6 +169,18 @@
       return Math.round((count / total) * 100);
     }
 
+    // Fonction robuste pour parser les choix contenant des virgules (ex: "Insta, TikTok")
+    function extractChoicesSafely(csvString, knownOptions) {
+        if (!csvString) return [];
+        let choices = [];
+        knownOptions.forEach(opt => {
+            if (csvString.includes(opt)) {
+                choices.push(opt);
+            }
+        });
+        return choices;
+    }
+
     function buildDashboard(data) {
       const total = data.length;
       const showCounts = total >= THRESHOLD;
@@ -212,9 +218,18 @@
       const counts = {
         statuts: {}, depts: {}, positions: {}, connaissances: {},
         avisActions: {}, forcesOrdre: {}, violences: {}, typeViolences: {},
-        canaux: {}, medias: {}, avancees: {}, emploiTemps: {}, reorg: {}
+        medias: {}, avancees: {}, emploiTemps: {}, reorg: {}
       };
-      const matrixRevendications = {}, matrixOpposition = {};
+      
+      const matrixRevendications = {}, matrixOpposition = {}, matrixCanaux = {};
+
+      const canauxOptions = [
+        "Réseaux sociaux (Instagram, TikTok, X, etc.)",
+        "Médias traditionnels (Télévision, Radio, Presse écrite)",
+        "Communications au sein de l'établissement / Syndicats",
+        "Bouche-à-oreille / Groupes de discussion (WhatsApp, Telegram)",
+        "Sur place / Témoignages directs"
+      ];
 
       data.forEach(row => {
         let val;
@@ -252,25 +267,50 @@
         val = row["Seriez-vous favorable à une réorganisation du rythme scolaire (moins d'heures de cours par jour avec des après-midis souvent libérés, mais des vacances scolaires plus courtes) ? (Choix unique)"];
         if(val) counts.reorg[val] = (counts.reorg[val] || 0) + 1;
 
-        val = row["Par quels canaux vous informez-vous principalement sur ce mouvement ? (2 Choix possible)"];
-        if (val) val.split(',').forEach(i => { let c = i.trim(); if (c) counts.canaux[c] = (counts.canaux[c] || 0) + 1; });
-
+        // Typage Tensions/Violences
         val = row["Quel type de situation s'agissait-il ? (Choix multiple)"];
-        if (val) val.split(',').forEach(i => { let c = i.trim(); if (c) counts.typeViolences[c] = (counts.typeViolences[c] || 0) + 1; });
+        if (val) {
+            let opts = val.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+            opts.forEach(i => {
+                let c = i.replace(/(^"|"$)/g, '').trim(); 
+                if (c) counts.typeViolences[c] = (counts.typeViolences[c] || 0) + 1; 
+            });
+        }
 
+        // Tableau Croisé : Revendications
         let revs = row["Quelles sont les revendications que vous estimez les plus légitimes et vraies ? (Choisissez par ordre de priorité)"];
-        if (revs) revs.split(',').forEach((i, idx) => {
-            let c = i.trim(); let rank = idx + 1;
-            if (!matrixRevendications[c]) matrixRevendications[c] = {};
-            matrixRevendications[c][rank] = (matrixRevendications[c][rank] || 0) + 1;
-        });
+        if (revs) {
+             let opts = revs.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+             opts.forEach((i, idx) => {
+                let c = i.replace(/(^"|"$)/g, '').trim(); 
+                let rank = idx + 1;
+                if (!matrixRevendications[c]) matrixRevendications[c] = {};
+                matrixRevendications[c][rank] = (matrixRevendications[c][rank] || 0) + 1;
+            });
+        }
 
+        // Tableau Croisé : Oppositions
         let opps = row["Si vous vous opposez totalement ou partiellement au mouvement, quelles en sont les principales raisons ? (Choisissez par ordre de priorité)"];
-        if (opps) opps.split(',').forEach((i, idx) => {
-            let c = i.trim(); let rank = idx + 1;
-            if (!matrixOpposition[c]) matrixOpposition[c] = {};
-            matrixOpposition[c][rank] = (matrixOpposition[c][rank] || 0) + 1;
-        });
+        if (opps) {
+            let opts = opps.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+            opts.forEach((i, idx) => {
+                let c = i.replace(/(^"|"$)/g, '').trim();  let rank = idx + 1;
+                if (!matrixOpposition[c]) matrixOpposition[c] = {};
+                matrixOpposition[c][rank] = (matrixOpposition[c][rank] || 0) + 1;
+            });
+        }
+
+        // Tableau Croisé : Canaux d'informations (2 choix)
+        let canaux = row["Par quels canaux vous informez-vous principalement sur ce mouvement ? (2 Choix possible)"];
+        if (canaux) {
+            let opts = extractChoicesSafely(canaux, canauxOptions);
+            opts.forEach((opt, idx) => {
+                let rank = idx + 1; // Choix 1 ou Choix 2
+                if(rank > 2) return; // Sécurité si > 2
+                if (!matrixCanaux[opt]) matrixCanaux[opt] = {1:0, 2:0};
+                matrixCanaux[opt][rank] = (matrixCanaux[opt][rank] || 0) + 1;
+            });
+        }
       });
 
       const sortedDepts = Object.entries(counts.depts).sort((a, b) => b[1] - a[1]).slice(0, 10);
@@ -289,14 +329,14 @@
       new Chart(document.getElementById('chartViolences'), { type: 'doughnut', data: { labels: Object.keys(counts.violences), datasets: [{ data: Object.values(counts.violences), backgroundColor: ['#ef4444', '#10b981', '#d1d5db'] }] }, options: commonOptions });
       new Chart(document.getElementById('chartTypeViolences'), { type: 'bar', data: { labels: Object.keys(counts.typeViolences), datasets: [{ data: Object.values(counts.typeViolences), backgroundColor: '#f43f5e' }] }, options: hBarOptions });
       
-      new Chart(document.getElementById('chartCanaux'), { type: 'bar', data: { labels: Object.keys(counts.canaux), datasets: [{ data: Object.values(counts.canaux), backgroundColor: '#0ea5e9' }] }, options: hBarOptions });
       new Chart(document.getElementById('chartMedias'), { type: 'doughnut', data: { labels: Object.keys(counts.medias), datasets: [{ data: Object.values(counts.medias), backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }] }, options: commonOptions });
       new Chart(document.getElementById('chartAvancees'), { type: 'pie', data: { labels: Object.keys(counts.avancees), datasets: [{ data: Object.values(counts.avancees), backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }] }, options: commonOptions });
       
       new Chart(document.getElementById('chartEmploiTemps'), { type: 'bar', data: { labels: Object.keys(counts.emploiTemps), datasets: [{ data: Object.values(counts.emploiTemps), backgroundColor: '#f59e0b' }] }, options: barOptions });
       new Chart(document.getElementById('chartReorganisation'), { type: 'pie', data: { labels: Object.keys(counts.reorg), datasets: [{ data: Object.values(counts.reorg), backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'] }] }, options: commonOptions });
 
-      function renderTable(containerId, matrixData) {
+      // Fonction générique pour générer un tableau croisé AVEC la colonne TOTAL
+      function renderTable(containerId, matrixData, forceMaxRank = 0) {
         const container = document.getElementById(containerId);
         const options = Object.keys(matrixData);
         if (options.length === 0) {
@@ -304,33 +344,43 @@
           return;
         }
 
-        let maxRank = 0;
-        options.forEach(opt => {
-          Object.keys(matrixData[opt]).forEach(r => { if (parseInt(r) > maxRank) maxRank = parseInt(r); });
-        });
+        let maxRank = forceMaxRank;
+        if(maxRank === 0) {
+            options.forEach(opt => {
+              Object.keys(matrixData[opt]).forEach(r => { if (parseInt(r) > maxRank) maxRank = parseInt(r); });
+            });
+        }
 
         let html = `<table><thead><tr><th>Modalités</th>`;
-        for (let i = 1; i <= maxRank; i++) html += `<th class="text-center">Rang ${i}</th>`;
-        html += `</tr></thead><tbody>`;
+        for (let i = 1; i <= maxRank; i++) html += `<th class="text-center">Choix ${i}</th>`;
+        html += `<th class="text-center font-bold">Total</th></tr></thead><tbody>`;
 
         options.forEach(opt => {
           html += `<tr><td class="font-medium text-gray-700">${opt}</td>`;
+          let rowTotal = 0;
           for (let i = 1; i <= maxRank; i++) {
             let count = matrixData[opt][i] || 0;
+            rowTotal += count;
             let perc = getPercentage(count, total);
             let cellClass = perc > 20 ? 'heat-cell' : '';
             let displayVal = showCounts ? `${count} <span class="text-xs text-gray-400">(${perc}%)</span>` : `${perc}%`;
             if (count === 0) displayVal = "-";
             html += `<td class="text-center ${cellClass}">${displayVal}</td>`;
           }
-          html += `</tr>`;
+          let totalPerc = getPercentage(rowTotal, total);
+          let totalDisplay = showCounts ? `${rowTotal} <span class="text-xs text-gray-500">(${totalPerc}%)</span>` : `${totalPerc}%`;
+          if(rowTotal === 0) totalDisplay = "-";
+          
+          html += `<td class="text-center total-cell">${totalDisplay}</td></tr>`;
         });
         html += `</tbody></table>`;
         container.innerHTML = html;
       }
 
+      // Appels pour générer les 3 tableaux
       renderTable('tableRevendications', matrixRevendications);
       renderTable('tableOpposition', matrixOpposition);
+      renderTable('tableCanaux', matrixCanaux, 2); // forceMaxRank = 2 car il y a max 2 choix
     }
   </script>
 </body>
