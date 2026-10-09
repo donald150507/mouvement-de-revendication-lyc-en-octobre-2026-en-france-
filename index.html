@@ -9,7 +9,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <style>
     /* Style minimaliste */
-    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; display: flex; flex-direction: column;}
     .table-container { overflow-x: auto; }
     table { width: 100%; text-align: left; border-collapse: collapse; }
     th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 0.875rem; }
@@ -51,11 +51,15 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Quel est votre statut principal ?</h3>
-        <canvas id="chartStatut" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartStatut"></canvas>
+        </div>
       </div>
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Départements les plus représentés (Top 10)</h3>
-        <canvas id="chartDept" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartDept"></canvas>
+        </div>
       </div>
     </div>
 
@@ -64,11 +68,15 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Position globale par rapport au mouvement</h3>
-        <canvas id="chartPosition" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartPosition"></canvas>
+        </div>
       </div>
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Connaissance des revendications portées</h3>
-        <canvas id="chartConnaissance" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartConnaissance"></canvas>
+        </div>
       </div>
     </div>
     <div class="card mb-6">
@@ -85,19 +93,27 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Avis sur les modes d'action (blocages, rassemblements)</h3>
-        <canvas id="chartAvisActions" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartAvisActions"></canvas>
+        </div>
       </div>
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Intervention des forces de l'ordre</h3>
-        <canvas id="chartForcesOrdre" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartForcesOrdre"></canvas>
+        </div>
       </div>
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Confrontation à des situations de tensions/violences</h3>
-        <canvas id="chartViolences" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartViolences"></canvas>
+        </div>
       </div>
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Types de situations (si confrontation)</h3>
-        <canvas id="chartTypeViolences" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartTypeViolences"></canvas>
+        </div>
       </div>
     </div>
 
@@ -106,15 +122,21 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Canaux d'information principaux</h3>
-        <canvas id="chartCanaux" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartCanaux"></canvas>
+        </div>
       </div>
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Fiabilité de la couverture médiatique</h3>
-        <canvas id="chartMedias" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartMedias"></canvas>
+        </div>
       </div>
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Obtention d'avancées concrètes ?</h3>
-        <canvas id="chartAvancees" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartAvancees"></canvas>
+        </div>
       </div>
     </div>
 
@@ -123,11 +145,15 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Appréciation de l'emploi du temps</h3>
-        <canvas id="chartEmploiTemps" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartEmploiTemps"></canvas>
+        </div>
       </div>
       <div class="card">
         <h3 class="text-sm font-semibold text-gray-600 mb-4">Favorable à une réorganisation du rythme scolaire ?</h3>
-        <canvas id="chartReorganisation" height="250"></canvas>
+        <div class="relative h-64 w-full">
+            <canvas id="chartReorganisation"></canvas>
+        </div>
       </div>
     </div>
 
@@ -155,7 +181,6 @@
       const total = data.length;
       const showCounts = total >= THRESHOLD;
 
-      // Configuration commune pour Chart.js (design épuré)
       Chart.defaults.font.family = 'Inter, sans-serif';
       Chart.defaults.color = '#6B7280';
       const commonOptions = {
@@ -186,7 +211,6 @@
         scales: { x: { ticks: { callback: function(val) { return showCounts ? val : getPercentage(val, total) + '%'; } } } }
       };
 
-      // 1. Initialisation des compteurs
       const counts = {
         statuts: {}, depts: {}, positions: {}, connaissances: {},
         avisActions: {}, forcesOrdre: {}, violences: {}, typeViolences: {},
@@ -194,7 +218,6 @@
       };
       const matrixRevendications = {}, matrixOpposition = {};
 
-      // 2. Collecte des données
       data.forEach(row => {
         let val;
 
@@ -207,7 +230,6 @@
         val = row["Quelle est votre position globale par rapport au mouvement de protestation actuel ?"];
         if(val) counts.positions[val] = (counts.positions[val] || 0) + 1;
 
-        // Note : Gérer les variations d'espaces dans les noms de colonnes
         val = row["Avez-vous une connaissance des revendications portées?"] || row["Avez-vous une connaissance des revendications portées ?"];
         if(val) counts.connaissances[val] = (counts.connaissances[val] || 0) + 1;
 
@@ -232,14 +254,12 @@
         val = row["Seriez-vous favorable à une réorganisation du rythme scolaire (moins d'heures de cours par jour avec des après-midis souvent libérés, mais des vacances scolaires plus courtes) ? (Choix unique)"];
         if(val) counts.reorg[val] = (counts.reorg[val] || 0) + 1;
 
-        // Choix multiples (séparés par virgule)
         val = row["Par quels canaux vous informez-vous principalement sur ce mouvement ? (2 Choix possible)"];
         if (val) val.split(',').forEach(i => { let c = i.trim(); if (c) counts.canaux[c] = (counts.canaux[c] || 0) + 1; });
 
         val = row["Quel type de situation s'agissait-il ? (Choix multiple)"];
         if (val) val.split(',').forEach(i => { let c = i.trim(); if (c) counts.typeViolences[c] = (counts.typeViolences[c] || 0) + 1; });
 
-        // Tableaux à double entrée
         let revs = row["Quelles sont les revendications que vous estimez les plus légitimes et vraies ? (Choisissez par ordre de priorité)"];
         if (revs) revs.split(',').forEach((i, idx) => {
             let c = i.trim(); let rank = idx + 1;
@@ -255,12 +275,9 @@
         });
       });
 
-      // Tri des départements (Top 10)
       const sortedDepts = Object.entries(counts.depts).sort((a, b) => b[1] - a[1]).slice(0, 10);
       const deptsLabels = sortedDepts.map(d => d[0]);
       const deptsData = sortedDepts.map(d => d[1]);
-
-      // --- Rendu des Graphiques ---
 
       new Chart(document.getElementById('chartStatut'), { type: 'doughnut', data: { labels: Object.keys(counts.statuts), datasets: [{ data: Object.values(counts.statuts), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#6b7280'] }] }, options: commonOptions });
       new Chart(document.getElementById('chartDept'), { type: 'bar', data: { labels: deptsLabels, datasets: [{ data: deptsData, backgroundColor: '#94a3b8' }] }, options: barOptions });
@@ -281,7 +298,6 @@
       new Chart(document.getElementById('chartEmploiTemps'), { type: 'bar', data: { labels: Object.keys(counts.emploiTemps), datasets: [{ data: Object.values(counts.emploiTemps), backgroundColor: '#f59e0b' }] }, options: barOptions });
       new Chart(document.getElementById('chartReorganisation'), { type: 'pie', data: { labels: Object.keys(counts.reorg), datasets: [{ data: Object.values(counts.reorg), backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'] }] }, options: commonOptions });
 
-      // --- Rendu des Tableaux à double entrée ---
       function renderTable(containerId, matrixData) {
         const container = document.getElementById(containerId);
         const options = Object.keys(matrixData);
